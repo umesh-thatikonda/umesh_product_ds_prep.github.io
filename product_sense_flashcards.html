@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Sense Flashcards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .control-group label {
+            color: white;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            background: white;
+            color: #333;
+            min-width: 150px;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: #ff6b6b;
+        }
+
+        .btn-secondary:hover {
+            background: #ff5252;
+        }
+
+        .progress {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            height: 20px;
+            border-radius: 15px;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .flashcard {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            min-height: 550px;
+            max-height: 700px;
+            cursor: pointer;
+            transition: all 0.6s ease;
+            transform-style: preserve-3d;
+            position: relative;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #55efc4, #00b894);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .card-type {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            margin: 10px 0;
+            font-weight: 700;
+        }
+
+        .card-content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .card-content h3 {
+            margin: 15px 0 8px 0;
+            font-size: 1.2rem;
+        }
+
+        .card-content ul {
+            text-align: left;
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .card-content li {
+            margin: 6px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Custom scrollbar */
+        .card-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card-content::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .card-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .card-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card-counter {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .instruction {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            animation: fadeInOut 2s infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .card-face {
+                padding: 25px 20px;
+            }
+            
+            .card-title {
+                font-size: 1.4rem;
+            }
+            
+            .card-content {
+                font-size: 0.95rem;
+                max-height: 400px;
+            }
+            
+            .card-content li {
+                font-size: 0.9rem;
+            }
+            
+            .flashcard {
+                min-height: 500px;
+                max-height: 650px;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Product Sense Flashcards</h1>
+            <p>Master Your Data Science Interviews</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="fsSelect">Choose FS Scenario:</label>
+                <select id="fsSelect">
+                    <option value="all">All Scenarios</option>
+                    <option value="FS1">FS1 - Streaming Service</option>
+                    <option value="FS2">FS2 - Social Media Reels</option>
+                    <option value="FS3">FS3 - Rideshare Carpool</option>
+                    <option value="FS4">FS4 - Food Delivery</option>
+                    <option value="FS5">FS5 - Private Accounts</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="typeSelect">Choose Card Type:</label>
+                <select id="typeSelect">
+                    <option value="all">All Types</option>
+                    <option value="questions">Business Questions</option>
+                    <option value="metrics">Metrics</option>
+                    <option value="dimensions">Dimensions & Cuts</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="shuffleCards()">🔀 Shuffle</button>
+            <button class="btn btn-secondary" onclick="resetProgress()">🔄 Reset</button>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div class="instruction">
+            💡 Click on the card to flip and see the answer
+        </div>
+
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="card-face card-front">
+                <div class="card-header">
+                    <span class="card-type" id="cardType">Business Questions</span>
+                    <h2 class="card-title" id="cardTitle">FS1 - Streaming Service</h2>
+                </div>
+                <div class="card-content" id="frontContent">
+                    Loading...
+                </div>
+                <div class="scroll-indicator" id="frontScrollIndicator" style="display: none;">↕ Scroll</div>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-header">
+                    <span class="card-type">Answer</span>
+                    <h2 class="card-title" id="backTitle">FS1 - Streaming Service</h2>
+                </div>
+                <div class="card-content" id="backContent">
+                    Loading...
+                </div>
+                <div class="scroll-indicator" id="backScrollIndicator" style="display: none;">↕ Scroll</div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="previousCard()">← Previous</button>
+            <span class="card-counter" id="cardCounter">1 / 15</span>
+            <button class="nav-btn" id="nextBtn" onclick="nextCard()">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        const flashcards = {
+            "FS1": {
+                "questions": {
+                    title: "FS1 - Streaming Service",
+                    front: "You're working at a video streaming service launched a few months ago. What areas would you look at to understand the overall health and performance of the product?",
+                    back: "<h3>📺 Viewership & Content Performance:</h3><ul><li><strong>Viewership Metrics:</strong> How many people are watching content across different genres and time periods</li><li><strong>Content Performance:</strong> Which content types, genres, and individual titles are most popular</li><li><strong>Content Utilization:</strong> What percentage of the content library is being consumed</li><li><strong>Content Freshness:</strong> Impact of new releases vs catalog content</li></ul><h3>🎯 User Engagement & Behavior:</h3><ul><li><strong>Engagement Patterns:</strong> How users interact with content (likes, comments, shares, ratings)</li><li><strong>Viewing Patterns:</strong> Binge-watching behavior, session lengths, completion rates</li><li><strong>Search & Discovery:</strong> How users find content, search success rates</li><li><strong>Cross-Device Usage:</strong> Usage patterns across TV, mobile, tablet, web</li></ul><h3>👥 Customer Lifecycle & Growth:</h3><ul><li><strong>Customer Retention:</strong> Are users coming back, subscription renewal rates</li><li><strong>Customer Acquisition:</strong> New subscriber growth, acquisition channels</li><li><strong>Churn Analysis:</strong> Why users are leaving, churn prediction</li><li><strong>User Lifecycle:</strong> Onboarding success, time to first watch</li></ul><h3>💰 Revenue & Business Health:</h3><ul><li><strong>Subscription Revenue:</strong> Monthly recurring revenue, average revenue per user</li><li><strong>Ad Revenue Performance:</strong> (if applicable) Ad completion rates, CPM</li><li><strong>Content ROI:</strong> Cost of content vs viewing hours generated</li></ul><h3>🎯 Product Experience:</h3><ul><li><strong>Recommendation Performance:</strong> How well the algorithm suggests relevant content</li><li><strong>Platform Performance:</strong> Streaming quality, buffering, technical issues</li><li><strong>Customer Satisfaction:</strong> User ratings, NPS, support tickets</li></ul>"
+                },
+                "metrics": {
+                    title: "FS1 - Streaming Service",
+                    front: "What metrics would you look at to understand engagement performance for a streaming service?",
+                    back: "<h3>📊 Core Engagement Metrics:</h3><ul><li><strong>Total Engagement:</strong> Likes + Comments + Shares + Ratings</li><li><strong>Engagement Rate:</strong> Total engagements per view or per user</li><li><strong>Content Interaction Rate:</strong> % of viewers who engage with content</li><li><strong>Social Sharing Rate:</strong> Content shared outside the platform</li></ul><h3>⏱️ Viewing Behavior Metrics:</h3><ul><li><strong>Video Completion Rates:</strong> % of content watched to end (by duration buckets)</li><li><strong>Average Watch Time:</strong> Time spent per user per session</li><li><strong>Repeat Watch Rate:</strong> % of content watched multiple times</li><li><strong>Binge-Watching Rate:</strong> % of users watching multiple episodes consecutively</li><li><strong>Time to Drop-off:</strong> When users typically stop watching</li></ul><h3>👥 User Activity Metrics:</h3><ul><li><strong>DAU, MAU, WAU:</strong> Daily/Monthly/Weekly Active Users</li><li><strong>Session Metrics:</strong> Average session duration, sessions per user</li><li><strong>Session Interval:</strong> Time between user sessions</li><li><strong>Content Discovery Rate:</strong> New content discovered per session</li></ul><h3>🔄 Retention & Growth Metrics:</h3><ul><li><strong>Retention Rates:</strong> Day 1, Day 7, Day 30 retention</li><li><strong>Subscription Retention:</strong> Monthly churn rate, renewal rate</li><li><strong>Feature Adoption:</strong> Usage of recommendations, search, lists</li></ul><h3>🎯 Quality Metrics:</h3><ul><li><strong>Content Rating:</strong> User ratings distribution</li><li><strong>Net Promoter Score (NPS):</strong> User satisfaction and loyalty</li><li><strong>Streaming Quality:</strong> Buffering rate, resolution achieved</li></ul>"
+                },
+                "dimensions": {
+                    title: "FS1 - Streaming Service",
+                    front: "What are the most important dimensions for analyzing streaming service metrics?",
+                    back: "<h3>👤 User Demographics & Behavior:</h3><ul><li><strong>Demographics:</strong> Age groups, Gender, Geographic location (Country/Region/City)</li><li><strong>Subscriber Tier:</strong> Free/Premium/Family plan users</li><li><strong>User Lifecycle:</strong> New/Returning/Churned/Reactivated users</li><li><strong>Usage Frequency:</strong> Heavy/Medium/Light viewers</li><li><strong>Primary Language:</strong> Content language preferences</li><li><strong>Household Type:</strong> Single/Family/Shared accounts</li></ul><h3>📺 Content Characteristics:</h3><ul><li><strong>Content Type:</strong> Movies, TV Series, Documentaries, Originals</li><li><strong>Genre Classification:</strong> Action, Comedy, Drama, Horror, Kids, etc.</li><li><strong>Content Duration:</strong> Short (< 30min), Medium (30-90min), Long (90min+)</li><li><strong>Content Age:</strong> New releases, Recent (< 1 year), Catalog content</li><li><strong>Content Language & Origin:</strong> Primary language, Country of origin</li><li><strong>Content Quality:</strong> HD, 4K, HDR availability</li><li><strong>Studio/Creator:</strong> Content source, Original vs Licensed</li></ul><h3>🖥️ Device & Platform:</h3><ul><li><strong>Device Type:</strong> Smart TV, Smartphone, Tablet, Desktop, Gaming Console</li><li><strong>Operating System:</strong> iOS, Android, webOS, Roku OS, etc.</li><li><strong>App Version:</strong> Platform version, feature availability</li><li><strong>Connection Type:</strong> WiFi vs Mobile data, Internet speed tiers</li></ul><h3>⏰ Temporal Patterns:</h3><ul><li><strong>Time Analysis:</strong> Hour of day, Day of week, Prime time vs off-peak</li><li><strong>Seasonal Trends:</strong> Weekday vs Weekend, Holidays vs regular days</li><li><strong>Content Release Timing:</strong> Launch day vs ongoing performance</li></ul>"
+                }
+            },
+            "FS2": {
+                "questions": {
+                    title: "FS2 - Social Media Reels",
+                    front: "You launched a new short video content type on a social media platform 2 months ago. What business questions help understand if this content is adding value?",
+                    back: "<h3>📈 Engagement Impact Questions:</h3><ul><li>How did overall engagement change after introducing short videos?</li><li>How frequently do users interact with short videos vs other content types?</li><li>Is there any change in time spent on app post launch?</li><li>Are short videos cannibalizing other content types or being additive?</li></ul><h3>👥 User Growth Questions:</h3><ul><li>Are we getting new customers/users due to the new content?</li><li>Are we activating dormant users post launch?</li><li>What's the impact on overall user base and user acquisition?</li><li>How is user retention after content launch?</li></ul><h3>💰 Revenue Impact Questions:</h3><ul><li>Has revenue changed at content level post launch?</li><li>What's the average revenue per user (ARPU) after launch?</li><li>Are there monetization opportunities specific to short videos?</li><li>What's the cost of content creation vs revenue generated?</li></ul><h3>😊 User Satisfaction Questions:</h3><ul><li>How satisfied are customers with the new content type?</li><li>What's the Net Promoter Score (NPS) change post launch?</li><li>Are there any user complaints or negative feedback patterns?</li><li>How do completion rates compare across content types?</li></ul>"
+                },
+                "metrics": {
+                    title: "FS2 - Social Media Reels",
+                    front: "What metrics would you define to answer business questions about short video content performance?",
+                    back: "<h3>📊 User Activity Metrics:</h3><ul><li><strong>DAU, MAU, WAU:</strong> Daily/Monthly/Weekly Active Users</li><li><strong>Session Metrics:</strong> Average session duration, session frequency</li><li><strong>User Growth:</strong> New user signups, user activation rate</li><li><strong>Retention Rates:</strong> 1-day, 7-day, 30-day retention</li></ul><h3>🎯 Engagement Metrics:</h3><ul><li><strong>Total Engagements:</strong> Likes + Comments + Reactions + Shares per content type</li><li><strong>Engagement Rate:</strong> (Engagements per content type) / Views</li><li><strong>Average Watch Time:</strong> Time spent per user across content types</li><li><strong>Completion Rate:</strong> % of short videos watched to completion</li><li><strong>Repeat View Rate:</strong> % of users who watch the same content multiple times</li></ul><h3>👥 User Behavior Metrics:</h3><ul><li><strong>Number of Reactivated Users:</strong> Dormant users returning due to new content</li><li><strong>Churn Rate:</strong> Users leaving the platform</li><li><strong>Content Creation Rate:</strong> User-generated short video content</li><li><strong>Cross-Content Engagement:</strong> Users engaging with both short videos and other content</li></ul><h3>💼 Business Metrics:</h3><ul><li><strong>Revenue Metrics:</strong> Gross revenue, ARPU (Average Revenue Per User)</li><li><strong>Growth Metrics:</strong> Total app installs/uninstalls, organic vs paid acquisition</li><li><strong>Satisfaction Metrics:</strong> CSAT, NPS, App store ratings</li></ul>"
+                },
+                "dimensions": {
+                    title: "FS2 - Social Media Reels",
+                    front: "What dimensions are most relevant for analyzing short video content metrics?",
+                    back: "<h3>📱 Content Dimensions:</h3><ul><li><strong>Content Type:</strong> Short videos vs Photos vs Text posts</li><li><strong>Video Duration:</strong> 5sec, 10sec, 15sec, 30sec buckets</li><li><strong>Content Quality:</strong> HD, FHD, 4K resolution</li><li><strong>Content Genre:</strong> Entertainment, Educational, News, Comedy, Music</li><li><strong>Content Language:</strong> Primary languages on platform</li><li><strong>Content Source:</strong> User-generated vs Professional content</li></ul><h3>👤 User Dimensions:</h3><ul><li><strong>Demographics:</strong> Age groups, Gender, Geographic location</li><li><strong>User Behavior:</strong> New/Returning/Churned/Reactivated users</li><li><strong>User Interests:</strong> Content preferences, following patterns</li><li><strong>User Engagement Level:</strong> Heavy/Medium/Light platform users</li><li><strong>Language Preference:</strong> Primary language settings</li></ul><h3>⏰ Time Dimensions:</h3><ul><li><strong>Temporal Patterns:</strong> Day of Week, Hour of day</li><li><strong>Usage Patterns:</strong> Weekend vs Weekday behavior</li><li><strong>Seasonal Trends:</strong> Holidays vs regular days</li><li><strong>Time Since Launch:</strong> Pre-launch vs post-launch periods</li></ul><h3>🔧 Technical & Location Dimensions:</h3><ul><li><strong>Device:</strong> App Version, Device Model, Operating System</li><li><strong>Platform:</strong> iOS vs Android, Phone vs Tablet</li><li><strong>Geography:</strong> Region, Country, State, City tier</li><li><strong>Connection:</strong> WiFi vs Mobile data, Network speed</li></ul>"
+                }
+            },
+            "FS3": {
+                "questions": {
+                    title: "FS3 - Rideshare Carpool",
+                    front: "You launched a carpool option for rideshare 2 months ago. Executives want to know if it's increasing app usage and providing good value proposition. What business questions would you ask?",
+                    back: "<h3>🚗 Customer-Centric Questions:</h3><ul><li>What percentage of active users have tried the carpool option at least once?</li><li>What is the repeat usage rate for carpool customers?</li><li>How does the average carpool fare discount compare to the average increase in trip duration?</li><li>How do CSAT and NPS scores for carpool trips compare to standard trips?</li><li>What percentage of new app installs can be attributed to the carpool feature?</li></ul><h3>👨‍🚗 Driver-Centric Questions:</h3><ul><li>Has the average revenue per driver increased or decreased since the launch of the carpool feature?</li><li>How has driver idle time changed post-launch of the carpool option?</li><li>How have driver ratings been impacted by the carpool feature?</li><li>Are drivers opting into carpool rides, and what's their satisfaction level?</li></ul><h3>💼 Business-Level Questions:</h3><ul><li>Has the carpool feature led to an increase in overall company revenue?</li><li>Has there been an increase in the total number of rides for the company since the launch?</li><li>What is the total monetary value of customer savings realized from the carpool feature?</li><li>Is the carpool feature requiring a higher or lower promotional spend to drive usage compared to standard rides?</li><li>What's the operational cost impact (support, technology, operations)?</li></ul>"
+                },
+                "metrics": {
+                    title: "FS3 - Rideshare Carpool",
+                    front: "What metrics would answer the carpool business questions for customers, drivers, and business?",
+                    back: "<h3>👥 Customer Metrics:</h3><ul><li><strong>Carpool Adoption Rate:</strong> % of active users who have taken at least one carpool ride</li><li><strong>Carpool Repeat Usage Rate:</strong> % of carpool users who take more than one carpool ride</li><li><strong>Average Customer Savings per Carpool Ride:</strong> Difference between standard fare and carpool fare</li><li><strong>Average Trip Duration Increase:</strong> Extra time spent in carpool vs standard ride</li><li><strong>Customer Satisfaction (CSAT/NPS):</strong> Ratings specifically for carpool trips</li></ul><h3>🚗 Driver Metrics:</h3><ul><li><strong>Change in Average Driver Revenue:</strong> Earnings comparison pre vs post carpool launch</li><li><strong>Change in Driver Idle Time:</strong> Average time drivers spend between trips</li><li><strong>Driver Ratings for Carpool vs Standard:</strong> Rating comparison by trip type</li><li><strong>Driver Opt-in Rate:</strong> % of drivers who choose to accept carpool rides</li></ul><h3>💰 Business Metrics:</h3><ul><li><strong>Total Rides Breakdown:</strong> Carpool vs standard rides volume</li><li><strong>Total Revenue Impact:</strong> Overall company revenue change</li><li><strong>New User Attribution:</strong> App installs/signups attributed to carpool</li><li><strong>Promotional Spend per Carpool Ride:</strong> Marketing costs to drive adoption</li><li><strong>Operational Cost per Ride:</strong> Support and infrastructure costs</li></ul><h3>📊 Platform Health Metrics:</h3><ul><li><strong>DAU/MAU/WAU:</strong> Active user metrics</li><li><strong>Session Frequency:</strong> App usage patterns</li><li><strong>Geographic Penetration:</strong> Carpool usage by city/region</li></ul>"
+                },
+                "dimensions": {
+                    title: "FS3 - Rideshare Carpool",
+                    front: "What dimensions are most relevant for carpool metrics analysis?",
+                    back: "<h3>🚗 Ride Dimensions:</h3><ul><li><strong>Ride Category:</strong> Short distance (0-5km), Medium (5-15km), Long distance (15km+)</li><li><strong>Ride Type:</strong> Pool vs Regular/Standard rides</li><li><strong>Trip Duration:</strong> Short (0-15min), Medium (15-45min), Long (45min+)</li><li><strong>Number of Stops:</strong> 2, 3, 4+ pickup/dropoff points</li><li><strong>Number of Passengers:</strong> Riders per carpool trip</li><li><strong>Route Overlap:</strong> % of route shared between passengers</li></ul><h3>👤 User Dimensions:</h3><ul><li><strong>Demographics:</strong> Age brackets, Gender, Income level</li><li><strong>Location:</strong> Home location, frequent destinations</li><li><strong>Customer Type:</strong> New/Returning/Reactivating users</li><li><strong>Usage Frequency:</strong> Heavy/Medium/Light platform users</li><li><strong>Price Sensitivity:</strong> Discount usage patterns</li></ul><h3>🚙 Vehicle Dimensions:</h3><ul><li><strong>Vehicle Type:</strong> Sedan, SUV, Hatchback, Premium</li><li><strong>Vehicle Details:</strong> Make, Model, Year</li><li><strong>Vehicle Capacity:</strong> 3, 4, 6+ passenger capacity</li><li><strong>Vehicle Rating:</strong> High/Medium/Low rated vehicles</li></ul><h3>🕐 Time & Location Dimensions:</h3><ul><li><strong>Time Patterns:</strong> Hour of day, Day of week</li><li><strong>Peak Analysis:</strong> Rush hours, Weekend/Weekday patterns</li><li><strong>Seasonal:</strong> Holidays, Weather conditions, Special events</li><li><strong>Geographic:</strong> City tier, Urban vs Suburban areas</li><li><strong>Route Type:</strong> Residential, Business district, Airport routes</li></ul>"
+                }
+            },
+            "FS4": {
+                "questions": {
+                    title: "FS4 - Food Delivery",
+                    front: "You launched a food ordering app a few months ago. Average revenue per restaurant is trending down week-over-week. How would you triage the root cause?",
+                    back: "<strong>Formula Analysis:</strong> Revenue per restaurant = Total Order Value / Number of Restaurants<br><br><h3>🔍 Potential Issues:</h3><ul><li><strong>Numerator Issues (Total Order Value ↓):</strong><ul><li>Total order count declining</li><li>Average order value declining</li></ul></li><li><strong>Denominator Issues (Restaurant Count ↑):</strong><ul><li>Restaurant count increasing (dilution effect)</li><li>New restaurants with lower performance</li></ul></li></ul><h3>🕵️ Investigation Areas:</h3><ul><li><strong>Data Quality:</strong> ETL workflows capturing data correctly, any logic changes</li><li><strong>User Segments:</strong> New vs existing user performance, user behavior changes</li><li><strong>Restaurant Performance:</strong> By location, restaurant type, cuisine type</li><li><strong>Funnel Analysis:</strong> Landing Page → Store Selection → Order Placement → Payment</li><li><strong>External Factors:</strong> Competition, seasonality, regulatory changes, economic conditions</li><li><strong>Internal Factors:</strong> Feature launches, A/B experiments, pricing changes, promotional strategies</li><li><strong>Supply Quality:</strong> Restaurant variety, menu availability, delivery capacity</li></ul>"
+                },
+                "metrics": {
+                    title: "FS4 - Food Delivery",
+                    front: "What metrics should you consider to evaluate how different restaurants are performing on the food delivery app?",
+                    back: "<h3>📊 Order & Revenue Metrics:</h3><ul><li><strong>Total Number of Orders:</strong> Order volume per restaurant</li><li><strong>Average Order Value (AOV):</strong> Revenue per order</li><li><strong>Average Basket Size:</strong> Number of items per order</li><li><strong>Order Frequency:</strong> Orders per customer per time period</li></ul><h3>⏱️ Operational Metrics:</h3><ul><li><strong>Average Delivery Times:</strong> Time from order to delivery</li><li><strong>Average Preparation Time:</strong> Restaurant efficiency</li><li><strong>Cancellation Rates:</strong> % orders cancelled (by customer/restaurant)</li><li><strong>On-time Delivery Rate:</strong> % orders delivered on time</li></ul><h3>😊 Experience Metrics:</h3><ul><li><strong>Food Ratings:</strong> Customer satisfaction with food quality</li><li><strong>Customer Satisfaction Scores (CSAT):</strong> Overall experience ratings</li><li><strong>Net Promoter Score (NPS):</strong> Customer loyalty and referral likelihood</li></ul><h3>👥 User Behavior Metrics:</h3><ul><li><strong>Customer Retention Rates:</strong> Repeat order rates</li><li><strong>Customer Churn Rates:</strong> Customer loss rates</li><li><strong>New Customer Acquisition:</strong> First-time order metrics</li><li><strong>Restaurant Utilization:</strong> Orders vs restaurant capacity</li></ul>"
+                },
+                "dimensions": {
+                    title: "FS4 - Food Delivery",
+                    front: "What dimensions help analyze restaurant and food delivery performance?",
+                    back: "<h3>👤 User Dimensions:</h3><ul><li><strong>Demographics:</strong> Age groups, Gender, Income level</li><li><strong>Location:</strong> Customer location, delivery distance</li><li><strong>Behavior:</strong> New/Returning/Reactivated users</li><li><strong>Preferences:</strong> Cuisine preferences, dietary restrictions</li></ul><h3>🛒 Order Dimensions:</h3><ul><li><strong>Order Value:</strong> Small/Medium/Large order buckets</li><li><strong>Order Type:</strong> Pickup vs Delivery</li><li><strong>Cuisine Type:</strong> Italian, Chinese, Indian, Fast Food, etc.</li><li><strong>Payment Method:</strong> Card, Cash, Digital wallet</li><li><strong>Promotional Usage:</strong> Discount codes, offers used</li></ul><h3>🏪 Restaurant Dimensions:</h3><ul><li><strong>Restaurant Size:</strong> QSR/Chain/Small/Medium establishments</li><li><strong>Restaurant Specialty:</strong> Primary cuisine type</li><li><strong>Location Density:</strong> Urban/Suburban, competition density</li><li><strong>Restaurant Ratings:</strong> High/Medium/Low rated establishments</li><li><strong>Restaurant Tenure:</strong> New vs established restaurants on platform</li></ul><h3>⏰ Time & Location Dimensions:</h3><ul><li><strong>Time Patterns:</strong> Meal times (breakfast/lunch/dinner), Day of week</li><li><strong>Seasonality:</strong> Weekend/Weekday, Holidays, Weather conditions</li><li><strong>Peak Analysis:</strong> Peak vs off-peak hours</li><li><strong>Geographic:</strong> City tier (Metro/Tier1/Tier2), Urban vs suburban</li><li><strong>Delivery Distance:</strong> Short/Medium/Long distance categories</li></ul>"
+                }
+            },
+            "FS5": {
+                "questions": {
+                    title: "FS5 - Private Accounts",
+                    front: "You introduced private accounts to a social networking platform and noticed engagement has gone down. What are your next steps to investigate?",
+                    back: "<h3>🔍 Data Quality & Technical Checks:</h3><ul><li>Is the data pipeline working properly and capturing all engagement events?</li><li>Are engagement metrics being logged correctly for both public and private accounts?</li><li>Have there been any workflow logic changes or bugs since the private accounts launch?</li><li>Are we correctly attributing engagement drops to the feature vs other factors?</li></ul><h3>📊 Engagement Deep-Dive Analysis:</h3><ul><li>How did overall platform engagement change after private accounts launch?</li><li>Which specific engagement types are causing the drop (likes/comments/shares/views)?</li><li>Is there a change in total time spent on the app post-launch?</li><li>Are users shifting behavior from public posting to private interactions?</li><li>How has content creation volume changed since the launch?</li></ul><h3>🎯 User Segmentation Analysis:</h3><ul><li>How does engagement differ between users who switched to private vs stayed public?</li><li>Performance breakdown by location (Metro/Tier1/Tier2 cities)</li><li>Performance by device type, OS, and app version</li><li>New user vs existing user behavior patterns</li><li>Power users vs casual users - who's most affected?</li></ul><h3>🔄 Funnel & User Journey Analysis:</h3><ul><li>App open → Landing Page → Content View → Engagement flow analysis</li><li>Follow request workflow: request → acceptance → subsequent engagement</li><li>Content discovery: how are users finding content from private accounts?</li></ul><h3>🌍 External & Internal Factors:</h3><ul><li>Seasonality effects, competitor actions, regulatory changes</li><li>Other feature launches, A/B experiments, algorithm changes</li><li>Pricing or policy changes that might affect user behavior</li></ul>"
+                },
+                "metrics": {
+                    title: "FS5 - Private Accounts",
+                    front: "What metrics would you look at to understand the engagement decline after private accounts launch?",
+                    back: "<h3>👥 User Activity & Growth Metrics:</h3><ul><li><strong>DAU, WAU, MAU:</strong> Daily/Weekly/Monthly active user trends</li><li><strong>User Base Composition:</strong> New vs Existing user growth and behavior</li><li><strong>Session Metrics:</strong> Average session duration, session frequency per user</li><li><strong>User Onboarding:</strong> New user activation and time-to-first-action</li></ul><h3>🎯 Engagement & Interaction Metrics:</h3><ul><li><strong>Total Platform Engagements:</strong> Overall interaction volume trends</li><li><strong>Engagement by Type:</strong> Likes, comments, shares, views analyzed separately</li><li><strong>Engagement Rate:</strong> Engagements per post, per user, per session</li><li><strong>Cross-Account Interactions:</strong> Public-to-private, private-to-private engagement patterns</li></ul><h3>🔄 User Lifecycle & Retention:</h3><ul><li><strong>Retention Rates:</strong> Day 1, Day 7, Day 30 user return patterns</li><li><strong>Churn Rate:</strong> Users leaving the platform entirely</li><li><strong>Reactivation Rate:</strong> Dormant users returning to activity</li></ul><h3>🔐 Private Account Specific Metrics:</h3><ul><li><strong>Follow Request Metrics:</strong> Requests sent, acceptance rates, rejection rates</li><li><strong>Private Account Adoption:</strong> % of users switching to private</li><li><strong>Private Account Engagement:</strong> Engagement levels for private vs public accounts</li></ul><h3>📱 Platform Health & Content:</h3><ul><li><strong>Content Creation Volume:</strong> Posts, stories, and other content being created</li><li><strong>Content Discovery:</strong> How users find new content and accounts</li><li><strong>Funnel Conversion:</strong> App open → content view → engagement rates</li><li><strong>User Satisfaction:</strong> App ratings, feedback scores, support ticket volume</li></ul>"
+                },
+                "dimensions": {
+                    title: "FS5 - Private Accounts",
+                    front: "What dimensions are most relevant for analyzing engagement decline metrics?",
+                    back: "<h3>👤 User Profile & Behavior Dimensions:</h3><ul><li><strong>Account Type:</strong> Public vs Private account settings</li><li><strong>User Demographics:</strong> Age groups, Gender, Geographic location</li><li><strong>User Lifecycle Stage:</strong> New/Returning/Dormant/Churned users</li><li><strong>User Activity Level:</strong> Heavy/Medium/Light platform users</li><li><strong>Account Age:</strong> Long-time vs recent users</li><li><strong>Follower Count:</strong> Micro vs Macro influencers vs regular users</li></ul><h3>📱 Content & Interaction Dimensions:</h3><ul><li><strong>Content Type:</strong> Photos, Videos, Text posts, Stories</li><li><strong>Content Visibility:</strong> Public posts vs Private posts vs Stories</li><li><strong>Content Genre:</strong> Personal, News, Entertainment, Educational</li><li><strong>Interaction Type:</strong> Likes, Comments, Shares, Saves, Direct messages</li><li><strong>Content Quality Indicators:</strong> High vs Low engagement content</li></ul><h3>🔧 Technical & Platform Dimensions:</h3><ul><li><strong>Device Characteristics:</strong> iOS vs Android, Phone vs Tablet</li><li><strong>App Version:</strong> Latest vs Older versions</li><li><strong>Platform Entry Point:</strong> Mobile app vs Web browser</li><li><strong>Connection Quality:</strong> WiFi vs Mobile data</li></ul><h3>⏰ Temporal & Behavioral Patterns:</h3><ul><li><strong>Time Analysis:</strong> Hour of day, Day of week patterns</li><li><strong>Usage Patterns:</strong> Weekend vs Weekday behavior</li><li><strong>Feature Launch Timeline:</strong> Pre-launch vs Post-launch periods</li><li><strong>Seasonal Effects:</strong> Holidays, Events, External factors</li></ul><h3>🌐 Geographic & Social Dimensions:</h3><ul><li><strong>Location Granularity:</strong> Country, State, City, Metro vs Rural</li><li><strong>Cultural Context:</strong> Privacy preferences by region</li><li><strong>Network Effects:</strong> Friend connection patterns, mutual followers</li><li><strong>Social Graph:</strong> Following relationships (mutual vs one-way)</li></ul>"
+                }
+            }
+        };
+
+        let currentCards = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let studiedCards = new Set();
+
+        function initializeCards() {
+            const fsFilter = document.getElementById('fsSelect').value;
+            const typeFilter = document.getElementById('typeSelect').value;
+            
+            currentCards = [];
+            
+            Object.keys(flashcards).forEach(fs => {
+                if (fsFilter === 'all' || fsFilter === fs) {
+                    Object.keys(flashcards[fs]).forEach(type => {
+                        if (typeFilter === 'all' || typeFilter === type) {
+                            currentCards.push({
+                                fs: fs,
+                                type: type,
+                                ...flashcards[fs][type]
+                            });
+                        }
+                    });
+                }
+            });
+            
+            currentIndex = 0;
+            updateCard();
+            updateProgress();
+        }
+
+        function updateCard() {
+            if (currentCards.length === 0) return;
+            
+            const card = currentCards[currentIndex];
+            const typeLabels = {
+                'questions': 'Business Questions',
+                'metrics': 'Metrics',
+                'dimensions': 'Dimensions & Cuts'
+            };
+            
+            document.getElementById('cardType').textContent = typeLabels[card.type];
+            document.getElementById('cardTitle').textContent = card.title;
+            document.getElementById('backTitle').textContent = card.title;
+            document.getElementById('frontContent').innerHTML = card.front;
+            document.getElementById('backContent').innerHTML = card.back;
+            document.getElementById('cardCounter').textContent = `${currentIndex + 1} / ${currentCards.length}`;
+            
+            document.getElementById('flashcard').classList.remove('flipped');
+            isFlipped = false;
+            
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === currentCards.length - 1;
+            
+            // Check for overflow and show scroll indicators
+            setTimeout(() => {
+                const frontContent = document.getElementById('frontContent');
+                const backContent = document.getElementById('backContent');
+                const frontIndicator = document.getElementById('frontScrollIndicator');
+                const backIndicator = document.getElementById('backScrollIndicator');
+                
+                frontIndicator.style.display = frontContent.scrollHeight > frontContent.clientHeight ? 'block' : 'none';
+                backIndicator.style.display = backContent.scrollHeight > backContent.clientHeight ? 'block' : 'none';
+            }, 100);
+        }
+
+        function updateProgress() {
+            const progress = (studiedCards.size / currentCards.length) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${Math.round(progress)}% Complete`;
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+            
+            if (isFlipped) {
+                studiedCards.add(currentIndex);
+                updateProgress();
+            }
+        }
+
+        function nextCard() {
+            if (currentIndex < currentCards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        function shuffleCards() {
+            for (let i = currentCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function resetProgress() {
+            studiedCards.clear();
+            updateProgress();
+        }
+
+        document.getElementById('fsSelect').addEventListener('change', initializeCards);
+        document.getElementById('typeSelect').addEventListener('change', initializeCards);
+
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case ' ':
+                case 'Enter':
+                    e.preventDefault();
+                    flipCard();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    previousCard();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    nextCard();
+                    break;
+            }
+        });
+
+        initializeCards();
+    </script>
+</body>
+</html>
